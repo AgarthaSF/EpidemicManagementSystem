@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.agarthasf.epipre.mapper.SchoolStaffMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.agarthasf.epipre.pojo.SchoolStaff">
+        <id column="identity" property="identity"/>
+        <result column="name" property="name"/>
+        <result column="address" property="address"/>
+        <result column="phone_number" property="phoneNumber"/>
+        <result column="id_card" property="idCard"/>
+        <result column="is_student" property="isStudent"/>
+        <result column="counselor_identity" property="counselorIdentity"/>
+    </resultMap>
+
+    <resultMap id="StudentsWithCounselorName" type="com.agarthasf.epipre.pojo.SchoolStaff" extends="BaseResultMap">
+        <result column="counselor_name" property="counselorName"/>
+    </resultMap>
+
+
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        identity, name, address, phone_number, id_card, is_student, counselor_identity
+    </sql>
+
+
+    <select id="getStudentListWithCounselorName" resultMap="StudentsWithCounselorName">
+        SELECT s.*,
+               c.name AS counselor_name
+        FROM school_staff AS s,
+             counselor AS c
+        WHERE s.counselor_identity = c.counselor_identity
+          and (s.identity like concat("%",#{identity},"%") or s.name like concat("%",#{identity},"%"))
+        ORDER BY s.identity ASC
+    </select>
+
+</mapper>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.agarthasf.epipre.mapper.DistrictEpidemicMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.agarthasf.epipre.pojo.DistrictEpidemic">
+        <id column="district_adcode" property="districtAdcode" />
+        <result column="district_name" property="districtName" />
+        <result column="current_confirmed_count" property="currentConfirmedCount" />
+        <result column="suspected_count" property="suspectedCount" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        district_adcode, district_name, current_confirmed_count, suspected_count
+    </sql>
+
+    <resultMap id="JoinMap" type="com.agarthasf.epipre.pojo.DistrictEpidemic" extends="BaseResultMap">
+        <result column="city_adcode" property="cityAdCode"/>
+        <result column="city_name" property="cityName"/>
+        <result column="city_current_confirmed_count" property="cityCurrentConfirmedCount"/>
+        <result column="city_suspected_count" property="citySuspectedCount"/>
+        <result column="city_risk_level" property="cityRiskLevel"/>
+        <result column="city_parent_adcode" property="cityParentAdcode"/>
+    </resultMap>
+
+
+    <select id="getJoinResult" resultMap="JoinMap">
+        SELECT
+            de.district_adcode,
+            de.district_name,
+            de.current_confirmed_count AS current_confirmed_count,
+            de.suspected_count AS suspected_count,
+            ce.city_adcode,
+            ce.city_name,
+            ce.current_confirmed_count AS city_current_confirmed_count,
+            ce.suspected_count AS city_suspected_count,
+            ce.risk_level as city_risk_level,
+            ce.parent_adcode as city_parent_adcode
+        FROM
+            district_epidemic AS de
+                INNER JOIN city_epidemic AS ce ON de.district_adcode = ce.parent_adcode
+                AND (de.district_adcode LIKE concat( "%", #{identity}, "%" )
+                  OR de.district_name LIKE concat( "%", #{identity}, "%" )
+                  OR ce.city_adcode LIKE concat( "%", #{identity}, "%" )
+                  OR ce.city_name LIKE concat( "%", #{identity}, "%" ))
+    </select>
+
+</mapper>

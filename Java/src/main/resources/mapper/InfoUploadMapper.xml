@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.agarthasf.epipre.mapper.InfoUploadMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.agarthasf.epipre.pojo.InfoUpload">
+        <id column="info_id" property="infoId"/>
+        <result column="identity" property="identity"/>
+        <result column="last_covid_date" property="lastCovidDate"/>
+        <result column="vaccine_count" property="vaccineCount"/>
+        <result column="info_date" property="infoDate"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        info_id
+        , identity, last_covid_date, vaccine_count, info_date
+    </sql>
+
+    <resultMap id="infoUploadWithName" type="com.agarthasf.epipre.pojo.InfoUpload" extends="BaseResultMap">
+        <result column="name" property="name"/>
+        <result column="phone_number" property="phoneNumber"/>
+    </resultMap>
+
+
+    <select id="getListByIdentity" resultMap="infoUploadWithName">
+        SELECT iu.*,
+               ss.NAME,
+               ss.phone_number
+        FROM info_upload AS iu,
+             school_staff AS ss
+        WHERE iu.identity = ss.identity
+          AND iu.identity = #{identity}
+        ORDER BY iu.info_date DESC
+    </select>
+
+
+    <select id="getAllWithName" resultMap="infoUploadWithName">
+        SELECT iu.*,
+               ss.NAME,
+               ss.phone_number
+        FROM info_upload AS iu,
+             school_staff AS ss
+        WHERE iu.identity = ss.identity
+          AND (
+                    iu.identity LIKE concat("%", #{identity}, "%")
+                OR ss.NAME LIKE concat("%", #{identity}, "%"))
+    </select>
+
+
+    <select id="getAnomaly" resultMap="infoUploadWithName">
+        SELECT
+            iu.*,
+            ss.NAME,
+            ss.phone_number
+        FROM
+            info_upload AS iu,
+            school_staff AS ss
+        WHERE
+            iu.identity = ss.identity
+          AND iu.info_date - iu.last_covid_date > 5000000
+          AND (
+                    iu.identity LIKE concat("%", #{identity}, "%")
+                OR ss.NAME LIKE concat("%", #{identity}, "%"))
+        ORDER BY iu.info_date DESC
+    </select>
+
+</mapper>

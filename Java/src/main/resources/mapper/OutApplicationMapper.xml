@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.agarthasf.epipre.mapper.OutApplicationMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.agarthasf.epipre.pojo.OutApplication">
+        <id column="application_id" property="applicationId"/>
+        <result column="student_identity" property="studentIdentity"/>
+        <result column="out_address_id" property="outAddressId"/>
+        <result column="out_time" property="outTime"/>
+        <result column="back_time" property="backTime"/>
+        <result column="application_state" property="applicationState"/>
+        <result column="application_date" property="applicationDate"/>
+        <result column="reason" property="reason"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        application_id
+        , student_identity, out_address_id, reason, out_time, back_time, application_state, application_date
+    </sql>
+
+
+    <resultMap id="ListWithNameAndAddress" type="com.agarthasf.epipre.pojo.OutApplication" extends="BaseResultMap">
+        <result column="name" property="name"/>
+        <result column="phone_number" property="phoneNumber"/>
+        <result column="address_name" property="addressName"/>
+    </resultMap>
+
+    <resultMap id="AnomalyDetailed" type="com.agarthasf.epipre.pojo.OutApplication" extends="BaseResultMap">
+        <result column="name" property="name"/>
+        <result column="phone_number" property="phoneNumber"/>
+        <result column="address_name" property="addressName"/>
+        <result column="longitude" property="longitude"/>
+        <result column="latitude" property="latitude"/>
+    </resultMap>
+
+
+    <select id="getTodoList" resultMap="ListWithNameAndAddress">
+        SELECT oa.application_id,
+               oa.student_identity,
+               ss.NAME,
+               ss.phone_number,
+               addr.address_name,
+               oa.reason,
+               oa.out_time,
+               oa.back_time,
+               oa.application_state,
+               oa.application_date
+        FROM out_application AS oa
+                 LEFT JOIN address AS addr ON oa.out_address_id = addr.address_id
+                 LEFT JOIN school_staff AS ss ON oa.student_identity = ss.identity
+        WHERE application_state = 0
+          AND ss.counselor_identity = #{counselorIdentity}
+          AND (
+                    ss.identity LIKE concat(
+                        "%", #{identity}, "%") or ss.name like concat("%", #{identity}, "%"))
+        ORDER BY application_date DESC
+
+    </select>
+
+    <select id="getHistory" resultMap="ListWithNameAndAddress">
+        SELECT oa.application_id,
+               oa.student_identity,
+               ss.NAME,
+               ss.phone_number,
+               addr.address_name,
+               oa.reason,
+               oa.out_time,
+               oa.back_time,
+               oa.application_state,
+               oa.application_date
+        FROM out_application AS oa
+                 LEFT JOIN address AS addr ON oa.out_address_id = addr.address_id
+                 LEFT JOIN school_staff AS ss ON oa.student_identity = ss.identity
+        WHERE application_state != 0 AND ss.counselor_identity = #{counselorIdentity}
+          AND (
+            ss.identity LIKE concat(
+            "%"
+            , #{identity}
+            , "%")
+           or ss.name like concat("%"
+            , #{identity}
+            , "%"))
+        ORDER BY
+            application_date DESC
+
+    </select>
+
+    <select id="getListById" resultMap="ListWithNameAndAddress">
+        SELECT oa.application_id,
+               oa.student_identity,
+               ss.NAME,
+               ss.phone_number,
+               addr.address_name,
+               oa.reason,
+               oa.out_time,
+               oa.back_time,
+               oa.application_state,
+               oa.application_date
+        FROM out_application AS oa
+                 LEFT JOIN address AS addr ON oa.out_address_id = addr.address_id
+                 LEFT JOIN school_staff AS ss ON oa.student_identity = ss.identity
+        WHERE oa.student_identity = #{identity}
+        ORDER BY application_date DESC
+    </select>
+
+
+    <select id="getAllRecently" resultMap="AnomalyDetailed">
+        SELECT
+        oa.application_id,
+        oa.student_identity,
+        ss.name,
+        ss.phone_number,
+        addr.address_name,
+        addr.longitude,
+        addr.latitude,
+        oa.reason,
+        oa.out_time,
+        oa.back_time,
+        oa.application_state,
+        oa.application_date
+        FROM
+        out_application AS oa
+        LEFT JOIN address AS addr ON oa.out_address_id = addr.address_id
+        LEFT JOIN school_staff AS ss ON oa.student_identity = ss.identity
+        where application_state = 1
+          AND (
+                    ss.identity LIKE concat("%", #{identity}, "%")
+                OR ss.name LIKE concat("%", #{identity}, "%"))
+        ORDER BY
+        application_date DESC
+    </select>
+
+</mapper>

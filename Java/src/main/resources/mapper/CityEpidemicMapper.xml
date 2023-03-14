@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.agarthasf.epipre.mapper.CityEpidemicMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.agarthasf.epipre.pojo.CityEpidemic">
+        <id column="city_adcode" property="cityAdcode"/>
+        <result column="city_name" property="cityName"/>
+        <result column="current_confirmed_count" property="currentConfirmedCount"/>
+        <result column="suspected_count" property="suspectedCount"/>
+        <result column="risk_level" property="riskLevel"/>
+        <result column="parent_adcode" property="parentAdcode"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        city_adcode
+        , city_name, current_confirmed_count, suspected_count, risk_level, parent_adcode
+    </sql>
+
+    <resultMap id="CityWithArea" type="com.agarthasf.epipre.pojo.CityEpidemic" extends="BaseResultMap">
+        <result column="area_id" property="areaId"/>
+        <result column="area_name" property="areaName"/>
+        <result column="area_risk_level" property="areaRiskLevel"/>
+    </resultMap>
+
+    <select id="getRiskList" resultMap="CityWithArea">
+        SELECT ce.city_adcode,
+               ce.city_name,
+               ce.risk_level,
+               ae.area_id,
+               ae.area_name,
+               ae.risk_level as area_risk_level
+        FROM city_epidemic AS ce
+            LEFT JOIN area_epidemic AS ae
+            ON ce.city_adcode = ae.belonging_city
+            WHERE (	ce.risk_level > 1 or ae.risk_level > 1)
+                AND (ce.city_adcode LIKE concat("%", #{identity}, "%")
+                    OR ce.city_name LIKE concat("%", #{identity}, "%")
+                    OR ae.area_id LIKE concat("%", #{identity}, "%")
+                    OR ae.area_name LIKE concat("%", #{identity}, "%"))
+    </select>
+
+
+</mapper>

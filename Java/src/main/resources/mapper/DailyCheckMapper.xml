@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.agarthasf.epipre.mapper.DailyCheckMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.agarthasf.epipre.pojo.DailyCheck">
+        <id column="check_id" property="checkId" />
+        <result column="identity" property="identity" />
+        <result column="body_temperature" property="bodyTemperature" />
+        <result column="fever_state" property="feverState" />
+        <result column="consultation_state" property="consultationState" />
+        <result column="high_risk_access" property="highRiskAccess" />
+        <result column="high_risk_member" property="highRiskMember" />
+        <result column="contact_high_risk_people" property="contactHighRiskPeople" />
+        <result column="remote_study" property="remoteStudy" />
+        <result column="supply_enough" property="supplyEnough" />
+        <result column="mask_number" property="maskNumber" />
+        <result column="check_date" property="checkDate" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        check_id, identity, body_temperature, fever_state, consultation_state, high_risk_access, high_risk_member, contact_high_risk_people, remote_study, supply_enough, mask_number, check_date
+    </sql>
+
+
+    <resultMap id="DCWithName" type="com.agarthasf.epipre.pojo.DailyCheck" extends="BaseResultMap">
+        <result column="name" property="name"/>
+        <result column="phone_number" property="phoneNumber"/>
+    </resultMap>
+
+
+    <select id="getAllWithName" resultMap="DCWithName">
+        SELECT
+            dc.*,
+            ss.NAME,
+            ss.phone_number
+        FROM
+            daily_check AS dc,
+            school_staff AS ss
+        WHERE
+            dc.identity = ss.identity
+          AND (
+                    dc.identity LIKE concat( "%", #{identity}, "%" )
+                OR ss.NAME LIKE concat( "%", #{identity}, "%" ))
+        ORDER BY dc.check_date DESC
+
+    </select>
+
+
+    <select id="getListByIdentity" resultMap="DCWithName">
+        SELECT
+            dc.*,
+            ss.NAME,
+            ss.phone_number
+        FROM
+            daily_check AS dc,
+            school_staff AS ss
+        WHERE
+            dc.identity = ss.identity
+          AND dc.identity = #{identity}
+        ORDER BY dc.check_date DESC
+    </select>
+
+
+    <select id="getAnomaly" resultMap="DCWithName">
+        SELECT
+            dc.*,
+            ss.NAME,
+            ss.phone_number
+        FROM
+            daily_check AS dc
+                NATURAL JOIN school_staff AS ss
+        WHERE
+            ( body_temperature > 37.2 OR fever_state = 1 OR high_risk_access = 1
+                  OR high_risk_member = 1 OR contact_high_risk_people = 1 OR supply_enough = 0 )
+          AND (
+                    ss.identity LIKE concat( "%", #{identity}, "%" )
+                OR ss.NAME LIKE concat( "%", #{identity}, "%" ))
+        ORDER BY
+            check_date DESC
+    </select>
+
+</mapper>

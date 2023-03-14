@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.agarthasf.epipre.mapper.DiagnosedCaseMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.agarthasf.epipre.pojo.DiagnosedCase">
+        <id column="case_id" property="caseId"/>
+        <result column="diagnosed_date" property="diagnosedDate"/>
+        <result column="diagnosed_address_id" property="diagnosedAddressId"/>
+        <result column="cured_state" property="curedState"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        case_id, diagnosed_date, cured_state, diagnosed_address_id
+    </sql>
+
+    <resultMap id="caseWithAddr" type="com.agarthasf.epipre.pojo.DiagnosedCase" extends="BaseResultMap">
+        <result column="address_name" property="addressName"/>
+        <result column="address_position" property="addressPosition"/>
+        <result column="longitude" property="longitude"/>
+        <result column="latitude" property="latitude"/>
+    </resultMap>
+
+
+    <select id="getAll" resultMap="caseWithAddr">
+        SELECT dc.case_id,
+               dc.diagnosed_date,
+               dc.cured_state,
+               addr.address_name,
+               addr.address_position,
+               addr.longitude,
+               addr.latitude
+        FROM diagnosed_case AS dc
+                 LEFT JOIN address AS addr ON dc.diagnosed_address_id = addr.address_id
+        WHERE dc.case_id like concat("%", #{identity},"%") or addr.address_name like concat("%", #{identity},"%")
+        ORDER BY dc.cured_state ASC ,dc.diagnosed_date DESC
+    </select>
+
+
+    <resultMap id="surveyDetail" type="com.agarthasf.epipre.pojo.DiagnosedCase">
+        <result column="case_id" property="caseId"/>
+        <result column="survey_id" property="surveyId"/>
+        <result column="address_name" property="addressName"/>
+        <result column="address_position" property="addressPosition"/>
+        <result column="longitude" property="longitude"/>
+        <result column="latitude" property="latitude"/>
+        <result column="arr_date" property="arrDate"/>
+    </resultMap>
+
+
+    <select id="getSurveyDetail" resultMap="surveyDetail">
+        SELECT
+            dc.case_id,
+            ds.survey_id,
+            addr.address_name,
+            addr.address_position,
+            ds.arr_date,
+            addr.longitude,
+            addr.latitude
+        FROM
+            diagnosed_survey AS ds
+                NATURAL JOIN diagnosed_case AS dc
+                NATURAL JOIN address AS addr
+        WHERE
+            cured_state = 0
+    </select>
+
+    <select id="gerRisk" resultMap="caseWithAddr">
+        SELECT dc.case_id,
+               dc.diagnosed_date,
+               dc.cured_state,
+               addr.address_name,
+               addr.address_position,
+               addr.longitude,
+               addr.latitude
+        FROM diagnosed_case AS dc
+                 LEFT JOIN address AS addr ON dc.diagnosed_address_id = addr.address_id
+        WHERE dc.cured_state = 0;
+    </select>
+
+</mapper>
