@@ -46,7 +46,7 @@ export default {
 
     const queryData = () => {
       loading.value = true;
-      axios.get("http://api.tianapi.com/ncov/index?key=536d11468d6b491fd6fcdb594a9a5e7d").then((response) => {
+      axios.get("http://api.tianapi.com/ncov/index?key=").then((response) => {
         loading.value = false;
         const data = response.data;
         if (data.code == 200) {
