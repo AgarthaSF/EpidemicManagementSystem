@@ -223,7 +223,7 @@ export default defineComponent({
       function fake() {
         axios.get("https://restapi.amap.com/v5/place/text", {
           params: {
-            key: 'f6f43d7b8324f2f24402c5fd201ab78b',
+            key: '',
             keywords: value,
           }
         }).then((response) => {
@@ -276,7 +276,7 @@ export default defineComponent({
       // 首先根据当前选中的地区详情查询具体地址信息
       axios.get("https://restapi.amap.com/v5/place/text", {
         params: {
-          key: 'f6f43d7b8324f2f24402c5fd201ab78b',
+          key: '',
           keywords: selectedAddress.value,
         }
       }).then((response) => {
