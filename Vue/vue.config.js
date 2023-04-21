@@ -5,7 +5,7 @@ module.exports = {
             const cdn ={
                 css: [],
                 js: [
-                    "https://webapi.amap.com/maps?v=1.4.13&key='f6f43d7b8324f2f24402c5fd201ab78b'",
+                    "https://webapi.amap.com/maps?v=1.4.13&key=''",
                     "//webapi.amap.com/ui/1.0/main.js"
                 ]
             }
